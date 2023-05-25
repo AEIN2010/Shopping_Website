@@ -41,7 +41,7 @@ public class OrderController {
         // Send mail for created order
         // Remove the "Bearer " prefix from the token
         token = token.replace("Bearer ", "");
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDZlZWM5ZmEzMTRmZDI5MjQzZjM1ZmMiLCJ1c2VybmFtZSI6InJ0MSIsImVtYWlsIjoicnRAcnQuY29tIiwicGFzc3dvcmQiOiIiLCJfX3YiOjAsImlhdCI6MTY4NTAxNzUzMCwiZXhwIjoxNjg1MDIxMTMwfQ.G55bv48gZ2B05usN8oGoXMH9TT9q4tLa0nHo0SmhMFU";
+//        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDZlZWM5ZmEzMTRmZDI5MjQzZjM1ZmMiLCJ1c2VybmFtZSI6InJ0MSIsImVtYWlsIjoicnRAcnQuY29tIiwicGFzc3dvcmQiOiIiLCJfX3YiOjAsImlhdCI6MTY4NTAxNzUzMCwiZXhwIjoxNjg1MDIxMTMwfQ.G55bv48gZ2B05usN8oGoXMH9TT9q4tLa0nHo0SmhMFU";
         String email = JwtUtil.extractEmailFromToken(token);
 
         rabbitMQSenderService.sendOrderConfirmation(
@@ -63,7 +63,7 @@ public class OrderController {
     @PutMapping
     public Order updateOrder(@RequestBody Order order, @RequestHeader("Authorization") String token) {
         Order updatedOrder = orderService.updateOrder(order);
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDZlZWM5ZmEzMTRmZDI5MjQzZjM1ZmMiLCJ1c2VybmFtZSI6InJ0MSIsImVtYWlsIjoicnRAcnQuY29tIiwicGFzc3dvcmQiOiIiLCJfX3YiOjAsImlhdCI6MTY4NTAxNzUzMCwiZXhwIjoxNjg1MDIxMTMwfQ.G55bv48gZ2B05usN8oGoXMH9TT9q4tLa0nHo0SmhMFU";
+//        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDZlZWM5ZmEzMTRmZDI5MjQzZjM1ZmMiLCJ1c2VybmFtZSI6InJ0MSIsImVtYWlsIjoicnRAcnQuY29tIiwicGFzc3dvcmQiOiIiLCJfX3YiOjAsImlhdCI6MTY4NTAxNzUzMCwiZXhwIjoxNjg1MDIxMTMwfQ.G55bv48gZ2B05usN8oGoXMH9TT9q4tLa0nHo0SmhMFU";
         String email = JwtUtil.extractEmailFromToken(token);
         // Check if the order status is updated to DELIVERED
         if(updatedOrder.getStatus() == Status.DELIVERED) {

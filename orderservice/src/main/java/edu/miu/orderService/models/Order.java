@@ -13,10 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- *
- * @author Daniel Tsegay Meresie
- */
 @Entity
 @Setter
 @Getter
@@ -29,9 +25,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    
-    private int userId;
-    
+    private String userId;
+
     @Enumerated(EnumType.STRING)
-    private Status status;//shipment status
+    private Status status; // shipment status
 }

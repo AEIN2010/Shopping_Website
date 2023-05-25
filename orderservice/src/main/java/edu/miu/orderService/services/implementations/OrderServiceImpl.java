@@ -41,18 +41,25 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order createOrder(String userId) {
-        int userIdInt = Integer.parseInt(userId); // Convert String to int
-        Cart c = retrieveCartForUser(userIdInt);
+        // Extract the user ID from the input string
+        String extractedUserId = userId.trim();
+        Cart c = retrieveCartForUser(extractedUserId);
         ResponseDataFromProduct response = retrieveProductData();
         validateProductQuantities(c, response);
         double price = computePrice(c, response);
         updateProductQuantities(c);
-        Order order = initializeOrder(userIdInt, price);
-        processPayment(order, price, userId);
+        Order order = initializeOrder(extractedUserId, price);
+        processPayment(order, price, extractedUserId);
         return orderRepository.save(order);
     }
 
-    private Cart retrieveCartForUser(int userId) {
+    private String extractUserId(String input) {
+        // Remove any non-alphanumeric characters from the input string
+        String userId = input.replaceAll("[^a-zA-Z0-9]", "");
+        return userId;
+    }
+
+    private Cart retrieveCartForUser(String userId) {
         String url = cartServiceUrl + "/" + userId;
         ResponseEntity<Cart> response = restTemplate.exchange(url, HttpMethod.GET, null, Cart.class);
         return response.getBody();
@@ -97,20 +104,19 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private Order initializeOrder(int userId, double price) {
+    private Order initializeOrder(String userId, double price) {
         Order order = new Order(null, userId, Status.UNPAID);
         return orderRepository.save(order);
     }
 
     private void processPayment(Order order, double price, String userId) {
-        int userIdInt = Integer.parseInt(userId.trim());
         Payment p = new Payment();
         p.setAmount(price);
         p.setCardNumber("1234123412341234");
         p.setCardType("VISA");
         p.setOrderId(order.getOrderId().toString());
         p.setCurrency("USD");
-        p.setUserId(userIdInt);
+        p.setUserId(userId); // Set userId as a string
         p.setId(null);
         String apiUrl = paymentServiceUrl;
 
@@ -123,10 +129,9 @@ public class OrderServiceImpl implements OrderService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             order.setStatus(Status.IN_TRANSIT);
-            clearCart(String.valueOf(userIdInt)); // Convert int to String
+            clearCart(userId);
         }
     }
-
 
     @Override
     public Order getOrder(Long orderId) {
@@ -152,12 +157,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String clearCart(String userId) {
-        int userIdInt = Integer.parseInt(userId.trim());
-        String url = cartServiceUrl + "/" + userIdInt;
+        String url = cartServiceUrl + "/" + userId;
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
 
         return response.getBody();
     }
-
 }
