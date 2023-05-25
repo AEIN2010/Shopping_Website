@@ -5,20 +5,20 @@ import edu.miu.orderService.models.Order;
 import java.util.List;
 
 /**
- *
- * @author Daniel Tsegay Meresie
+ * OrderService interface
  */
 public interface OrderService {
     List<Order> getOrders();
 
-    Order createOrder(int order);
+    Order createOrder(String userId);
 
     Order getOrder(Long orderId);
 
     Order updateOrder(Order order);
 
-    Order deleteOrder(Long OrderId);
-    List<Order> findOrdersByUserId(int userId);
+    Order deleteOrder(Long orderId);
 
-    String clearCart(int userId);
+    List<Order> findOrdersByUserId(String userId);
+
+    String clearCart(String userId);
 }

@@ -5,10 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-/**
- *
- * @author Daniel Tsegay Meresie
- */
-public interface OrderRepository extends JpaRepository<Order, Long>{
-    List<Order> findByUserId(int userId);
+public interface OrderRepository extends JpaRepository<Order, Long> {
+    List<Order> findByUserId(String userId);
 }

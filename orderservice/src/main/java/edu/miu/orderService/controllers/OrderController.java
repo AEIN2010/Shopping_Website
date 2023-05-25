@@ -30,12 +30,12 @@ public class OrderController {
         return orderService.getOrders();
     }
     @GetMapping("/byid/{userId}")
-    public List<Order> getOrdersById(@PathVariable int userId){
+    public List<Order> getOrdersById(@PathVariable String userId){
         return orderService.findOrdersByUserId(userId);
     }
 
     @PostMapping("/{userId}")
-    public Order createOrder(@PathVariable int userId, @RequestHeader("Authorization") String token) {
+    public Order createOrder(@PathVariable String userId, @RequestHeader("Authorization") String token) {
         Order order = orderService.createOrder(userId);
 
         // Send mail for created order
@@ -63,7 +63,8 @@ public class OrderController {
     @PutMapping
     public Order updateOrder(@RequestBody Order order, @RequestHeader("Authorization") String token) {
         Order updatedOrder = orderService.updateOrder(order);
-        String email = JwtUtil.extractEmailFromToken(token);
+        String email = "dummy@email.com";
+//        String email = JwtUtil.extractEmailFromToken(token);
         // Check if the order status is updated to DELIVERED
         if(updatedOrder.getStatus() == Status.DELIVERED) {
             // Send mail for delivery order

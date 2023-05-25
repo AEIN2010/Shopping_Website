@@ -40,14 +40,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order createOrder(int userId) {
-        Cart c = retrieveCartForUser(userId);
+    public Order createOrder(String userId) {
+        int userIdInt = Integer.parseInt(userId); // Convert String to int
+        Cart c = retrieveCartForUser(userIdInt);
         ResponseDataFromProduct response = retrieveProductData();
         validateProductQuantities(c, response);
         double price = computePrice(c, response);
         updateProductQuantities(c);
-        Order order = initializeOrder(userId, price);
-        processPayment(order, price);
+        Order order = initializeOrder(userIdInt, price);
+        processPayment(order, price, userId);
         return orderRepository.save(order);
     }
 
@@ -64,9 +65,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void validateProductQuantities(Cart c, ResponseDataFromProduct response) {
-        for(Product p : c.getProds()){
-            for(Product2 p2 : response.getData()){
-                if(p.getProdId().equals(p2.get_id()) && p.getQuantity() > p2.getQuantity()){
+        for (Product p : c.getProds()) {
+            for (Product2 p2 : response.getData()) {
+                if (p.getProdId().equals(p2.get_id()) && p.getQuantity() > p2.getQuantity()) {
                     throw new RuntimeException("Not enough products for product with Id + " + p.getProdId());
                 }
             }
@@ -75,9 +76,9 @@ public class OrderServiceImpl implements OrderService {
 
     private double computePrice(Cart c, ResponseDataFromProduct response) {
         double price = 0;
-        for(Product p : c.getProds()){
-            for(Product2 p2 : response.getData()){
-                if(p.getProdId().equals(p2.get_id()) ){
+        for (Product p : c.getProds()) {
+            for (Product2 p2 : response.getData()) {
+                if (p.getProdId().equals(p2.get_id())) {
                     price += p.getQuantity() * p2.getPrice();
                 }
             }
@@ -86,8 +87,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void updateProductQuantities(Cart c) {
-        for(Product p : c.getProds()){
-            String url = productServiceUrl + "/" + p.getProdId() ;
+        for (Product p : c.getProds()) {
+            String url = productServiceUrl + "/" + p.getProdId();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             String requestBody = "{\"order_quantity\": \"" + p.getQuantity() + "\"}";
@@ -101,15 +102,15 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(order);
     }
 
-
-    private void processPayment(Order order, double price) {
+    private void processPayment(Order order, double price, String userId) {
+        int userIdInt = Integer.parseInt(userId.trim());
         Payment p = new Payment();
         p.setAmount(price);
         p.setCardNumber("1234123412341234");
         p.setCardType("VISA");
         p.setOrderId(order.getOrderId().toString());
         p.setCurrency("USD");
-        p.setUserId(order.getUserId());
+        p.setUserId(userIdInt);
         p.setId(null);
         String apiUrl = paymentServiceUrl;
 
@@ -122,9 +123,10 @@ public class OrderServiceImpl implements OrderService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             order.setStatus(Status.IN_TRANSIT);
-            clearCart(order.getUserId());// clear the cart for the user
+            clearCart(String.valueOf(userIdInt)); // Convert int to String
         }
     }
+
 
     @Override
     public Order getOrder(Long orderId) {
@@ -137,24 +139,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order deleteOrder(Long OrderId) {
-        Order order = orderRepository.findById(OrderId).orElseThrow();
+    public Order deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
         orderRepository.delete(order);
         return order;
     }
 
     @Override
-    public List<Order> findOrdersByUserId(int userId) {
+    public List<Order> findOrdersByUserId(String userId) {
         return orderRepository.findByUserId(userId);
-
     }
 
     @Override
-    public String clearCart(int userId) {
-        String url = cartServiceUrl + "/" + userId;
+    public String clearCart(String userId) {
+        int userIdInt = Integer.parseInt(userId.trim());
+        String url = cartServiceUrl + "/" + userIdInt;
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
 
         return response.getBody();
     }
+
 }
