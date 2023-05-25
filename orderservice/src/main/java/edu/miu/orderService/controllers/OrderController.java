@@ -30,19 +30,19 @@ public class OrderController {
         return orderService.getOrders();
     }
     @GetMapping("/byid/{userId}")
-    public List<Order> getOrdersById(@PathVariable int userId){
+    public List<Order> getOrdersById(@PathVariable String userId){
         return orderService.findOrdersByUserId(userId);
     }
 
     @PostMapping("/{userId}")
-    public Order createOrder(@PathVariable int userId, @RequestHeader("Authorization") String token) {
+    public Order createOrder(@PathVariable String userId, @RequestHeader("Authorization") String token) {
         Order order = orderService.createOrder(userId);
 
         // Send mail for created order
         // Remove the "Bearer " prefix from the token
         token = token.replace("Bearer ", "");
-
-        String email = "dummy@email.com";//JwtUtil.extractEmailFromToken(token);
+//        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDZlZWM5ZmEzMTRmZDI5MjQzZjM1ZmMiLCJ1c2VybmFtZSI6InJ0MSIsImVtYWlsIjoicnRAcnQuY29tIiwicGFzc3dvcmQiOiIiLCJfX3YiOjAsImlhdCI6MTY4NTAxNzUzMCwiZXhwIjoxNjg1MDIxMTMwfQ.G55bv48gZ2B05usN8oGoXMH9TT9q4tLa0nHo0SmhMFU";
+        String email = JwtUtil.extractEmailFromToken(token);
 
         rabbitMQSenderService.sendOrderConfirmation(
                 "sender@example.com",
@@ -63,6 +63,7 @@ public class OrderController {
     @PutMapping
     public Order updateOrder(@RequestBody Order order, @RequestHeader("Authorization") String token) {
         Order updatedOrder = orderService.updateOrder(order);
+//        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDZlZWM5ZmEzMTRmZDI5MjQzZjM1ZmMiLCJ1c2VybmFtZSI6InJ0MSIsImVtYWlsIjoicnRAcnQuY29tIiwicGFzc3dvcmQiOiIiLCJfX3YiOjAsImlhdCI6MTY4NTAxNzUzMCwiZXhwIjoxNjg1MDIxMTMwfQ.G55bv48gZ2B05usN8oGoXMH9TT9q4tLa0nHo0SmhMFU";
         String email = JwtUtil.extractEmailFromToken(token);
         // Check if the order status is updated to DELIVERED
         if(updatedOrder.getStatus() == Status.DELIVERED) {

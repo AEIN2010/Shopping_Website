@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -41,18 +40,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order createOrder(int userId) {
-        Cart c = retrieveCartForUser(userId);
+    public Order createOrder(String userId) {
+        // Extract the user ID from the input string
+        String extractedUserId = userId.trim();
+        Cart c = retrieveCartForUser(extractedUserId);
         ResponseDataFromProduct response = retrieveProductData();
         validateProductQuantities(c, response);
         double price = computePrice(c, response);
         updateProductQuantities(c);
-        Order order = initializeOrder(userId, price);
-        processPayment(order, price);
+        Order order = initializeOrder(extractedUserId, price);
+        processPayment(order, price, extractedUserId);
         return orderRepository.save(order);
     }
 
-    private Cart retrieveCartForUser(int userId) {
+    private String extractUserId(String input) {
+        // Remove any non-alphanumeric characters from the input string
+        String userId = input.replaceAll("[^a-zA-Z0-9]", "");
+        return userId;
+    }
+
+    private Cart retrieveCartForUser(String userId) {
         String url = cartServiceUrl + "/" + userId;
         ResponseEntity<Cart> response = restTemplate.exchange(url, HttpMethod.GET, null, Cart.class);
         return response.getBody();
@@ -65,9 +72,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void validateProductQuantities(Cart c, ResponseDataFromProduct response) {
-        for(Product p : c.getProds()){
-            for(Product2 p2 : response.getData()){
-                if(p.getProdId().equals(p2.get_id()) && p.getQuantity() > p2.getQuantity()){
+        for (Product p : c.getProds()) {
+            for (Product2 p2 : response.getData()) {
+                if (p.getProdId().equals(p2.get_id()) && p.getQuantity() > p2.getQuantity()) {
                     throw new RuntimeException("Not enough products for product with Id + " + p.getProdId());
                 }
             }
@@ -76,9 +83,9 @@ public class OrderServiceImpl implements OrderService {
 
     private double computePrice(Cart c, ResponseDataFromProduct response) {
         double price = 0;
-        for(Product p : c.getProds()){
-            for(Product2 p2 : response.getData()){
-                if(p.getProdId().equals(p2.get_id()) ){
+        for (Product p : c.getProds()) {
+            for (Product2 p2 : response.getData()) {
+                if (p.getProdId().equals(p2.get_id())) {
                     price += p.getQuantity() * p2.getPrice();
                 }
             }
@@ -87,8 +94,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void updateProductQuantities(Cart c) {
-        for(Product p : c.getProds()){
-            String url = productServiceUrl + "/" + p.getProdId() ;
+        for (Product p : c.getProds()) {
+            String url = productServiceUrl + "/" + p.getProdId();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             String requestBody = "{\"order_quantity\": \"" + p.getQuantity() + "\"}";
@@ -97,20 +104,19 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private Order initializeOrder(int userId, double price) {
+    private Order initializeOrder(String userId, double price) {
         Order order = new Order(null, userId, Status.UNPAID);
         return orderRepository.save(order);
     }
 
-
-    private void processPayment(Order order, double price) {
+    private void processPayment(Order order, double price, String userId) {
         Payment p = new Payment();
         p.setAmount(price);
         p.setCardNumber("1234123412341234");
         p.setCardType("VISA");
         p.setOrderId(order.getOrderId().toString());
         p.setCurrency("USD");
-        p.setUserId(order.getUserId());
+        p.setUserId(userId); // Set userId as a string
         p.setId(null);
         String apiUrl = paymentServiceUrl;
 
@@ -123,6 +129,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             order.setStatus(Status.IN_TRANSIT);
+            clearCart(userId);
         }
     }
 
@@ -137,15 +144,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order deleteOrder(Long OrderId) {
-        Order order = orderRepository.findById(OrderId).orElseThrow();
+    public Order deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
         orderRepository.delete(order);
         return order;
     }
 
     @Override
-    public List<Order> findOrdersByUserId(int userId) {
+    public List<Order> findOrdersByUserId(String userId) {
         return orderRepository.findByUserId(userId);
+    }
 
+    @Override
+    public String clearCart(String userId) {
+        String url = cartServiceUrl + "/" + userId;
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
+
+        return response.getBody();
     }
 }
