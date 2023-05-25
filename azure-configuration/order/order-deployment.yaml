@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+        - name: order
+          image: microservicedesign.azurecr.io/order:1.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 12001
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql.wardrobewiz.svc.cluster.local:3306/payment_database
+            - name: SPRING_DATASOURCE_USERNAME
+              value: admin
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: toor
+            - name: RABBITMQ_URL
+              value: rabbitmq.wardrobewiz.svc.cluster.local
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: guest
+            - name: RABBITMQ_PASSWORD
+              value: guest
+            - name: CART_SERVICE_URL
+              value: http://cart.wardrobewiz.svc.cluster.local:12001/api/cart
+            - name: PRODUCT_SERVICE_URL
+              value: http://product.wardrobewiz.svc.cluster.local:8888/products
+            - name: PAYMENT_SERVICE_URL
+              value: http://payment.wardrobewiz.svc.cluster.local:8081/api/payment
+      imagePullSecrets:
+        - name: thai-acr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+spec:
+  selector:
+    app: order
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 12001
+  type: ClusterIP

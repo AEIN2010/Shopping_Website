@@ -23,4 +23,6 @@ spec:
             - name: SPRING_MAIL_PORT
               value: "1025"
             - name: SPRING_RABBITMQ_HOST
-              value: "rabbitmq.default.svc.cluster.local"
+              value: "rabbitmq.wardrobewiz.svc.cluster.local"
+      imagePullSecrets: 
+      - name: thai-acr

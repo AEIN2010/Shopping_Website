@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const mongoUrl = process.env.MONGO_URL;
-const testServerUrl = process.env.TEST_SERVER_URL;
 
 export const config = {
     dbUrl: mongoUrl,
@@ -10,5 +9,6 @@ export const config = {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     },
-    testServer: testServerUrl
 };
+
+export const secret_key = process.env.SECRET_KEY;

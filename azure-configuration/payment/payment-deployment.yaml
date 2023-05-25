@@ -15,11 +15,12 @@ spec:
       containers:
         - name: payment
           image: microservicedesign.azurecr.io/payment
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql.default.svc.cluster.local:3306/payment_database
+              value: jdbc:mysql://mysql.wardrobewiz.svc.cluster.local:3306/payment_database
             - name: SPRING_DATASOURCE_USERNAME
               value: admin
             - name: SPRING_DATASOURCE_PASSWORD
@@ -32,3 +33,6 @@ spec:
               value: update
             - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
               value: org.hibernate.dialect.MySQL5Dialect
+      imagePullSecrets:
+        - name: thai-acr
+      

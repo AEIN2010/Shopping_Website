@@ -15,14 +15,16 @@ spec:
       containers:
         - name: cart
           image: microservicedesign.azurecr.io/cart
+          imagePullPolicy: Always
           ports:
             - containerPort: 8888
           env:
             - name: SPRING_REDIS_HOST
-              value: redis.default.svc.cluster.local
+              value: redis.wardrobewiz.svc.cluster.local
             - name: SPRING_REDIS_PORT
               value: "6379"
-
+      imagePullSecrets:
+        - name: thai-acr
 ---
 
 apiVersion: v1
@@ -35,4 +37,3 @@ spec:
   ports:
     - port: 8888
       targetPort: 8888
-  type: LoadBalancer

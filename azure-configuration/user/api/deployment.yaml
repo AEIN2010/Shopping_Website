@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-user-service
+  template:
+    metadata:
+      labels:
+        app: pod-user-service
+    spec:
+      containers:
+        - name: con-user-services
+          image: wardrobewiz.azurecr.io/user-svc:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_URL
+              value: mongodb://10.0.43.128:27017/userdb
+      imagePullSecrets:
+        - name: acr-secret

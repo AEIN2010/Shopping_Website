@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-users-db
+spec:
+  selector:
+    matchLabels:
+      app: pod-users-db
+  template:
+    metadata:
+      labels:
+        app: pod-users-db
+    spec:
+      containers:
+        - name: con-users-db
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+          
