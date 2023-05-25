@@ -1,14 +1,3 @@
-package com.sa.shopingcart;
-
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-public class StringAndList {
-
-
     public static List<ShoppingCartItem> StringToList(String input) {
         // Remove outer curly braces
         String cleanedInput = input;
@@ -28,7 +17,8 @@ public class StringAndList {
             shoppingCartItem.quantity = (Integer.parseInt(elements[1]));
             // Assuming the date is in a specific format, you can parse it accordingly
             // Here's an example using the current date as a placeholder
-            shoppingCartItem.updeted = elements[2];
+            shoppingCartItem.updated = elements[2];
+            shoppingCartItem.prodName = elements[3];
 
             shoppingCartItems.add(shoppingCartItem);
         }
@@ -41,7 +31,7 @@ public class StringAndList {
         List<String> sets = new ArrayList<>();
 
         for (ShoppingCartItem item : shoppingCartItems) {
-            String set = item.prodId + "," + item.quantity + "," + item.updeted;
+            String set = item.prodId + "," + item.quantity + "," + item.updated + "," + item.prodName;
             sets.add(set);
         }
 
@@ -51,4 +41,3 @@ public class StringAndList {
 
 
 
-}
