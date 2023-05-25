@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -123,6 +122,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             order.setStatus(Status.IN_TRANSIT);
+            clearCart(order.getUserId());// clear the cart for the user
         }
     }
 
@@ -147,5 +147,14 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> findOrdersByUserId(int userId) {
         return orderRepository.findByUserId(userId);
 
+    }
+
+    @Override
+    public String clearCart(int userId) {
+        String url = cartServiceUrl + "/" + userId;
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
+
+        return response.getBody();
     }
 }
