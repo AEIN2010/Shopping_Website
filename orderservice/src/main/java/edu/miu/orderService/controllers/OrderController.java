@@ -1,19 +1,14 @@
 package edu.miu.orderService.controllers;
 
-import java.util.List;
-
 import edu.miu.orderService.JwtUtil;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import edu.miu.orderService.models.Order;
-import edu.miu.orderService.models.Payment;
 import edu.miu.orderService.services.OrderService;
 import edu.miu.orderService.services.RabbitMQSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-// Import the Status enum
-import edu.miu.orderService.models.Status;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -29,8 +24,9 @@ public class OrderController {
     public List<Order> getOrders() {
         return orderService.getOrders();
     }
+
     @GetMapping("/byid/{userId}")
-    public List<Order> getOrdersById(@PathVariable String userId){
+    public List<Order> getOrdersById(@PathVariable String userId) {
         return orderService.findOrdersByUserId(userId);
     }
 
@@ -38,11 +34,9 @@ public class OrderController {
     public Order createOrder(@PathVariable String userId, @RequestHeader("Authorization") String token) {
         Order order = orderService.createOrder(userId);
 
-        // Send mail for created order
-        // Remove the "Bearer " prefix from the token
-        token = token.replace("Bearer ", "");
-
-        String email = "dummy@email.com";//JwtUtil.extractEmailFromToken(token);
+        // Send email for created order
+        token = JwtUtil.removeBearerPrefix(token);
+        String email = JwtUtil.extractEmailFromToken(token);
 
         rabbitMQSenderService.sendOrderConfirmation(
                 "sender@example.com",
@@ -63,11 +57,12 @@ public class OrderController {
     @PutMapping
     public Order updateOrder(@RequestBody Order order, @RequestHeader("Authorization") String token) {
         Order updatedOrder = orderService.updateOrder(order);
-        String email = "dummy@email.com";
-//        String email = JwtUtil.extractEmailFromToken(token);
+        token = JwtUtil.removeBearerPrefix(token);
+        String email = JwtUtil.extractEmailFromToken(token);
+
         // Check if the order status is updated to DELIVERED
-        if(updatedOrder.getStatus() == Status.DELIVERED) {
-            // Send mail for delivery order
+        if (updatedOrder.getStatus() == Status.DELIVERED) {
+            // Send email for delivery order
             rabbitMQSenderService.sendDeliveryConfirmation(
                     "sender@example.com",
                     List.of(email),
@@ -76,6 +71,7 @@ public class OrderController {
                     List.of()
             );
         }
+
         return updatedOrder;
     }
 
