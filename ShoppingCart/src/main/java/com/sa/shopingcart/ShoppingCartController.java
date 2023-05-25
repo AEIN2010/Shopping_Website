@@ -88,7 +88,7 @@ public class ShoppingCartController {
     @DeleteMapping("/{customerId}")
     @ResponseBody
     public String deleteCart(@PathVariable("customerId") String customerId){
-       
+
         try{
             redisService.deleteCart(customerId);
             return "Cart of "+customerId+" deleted!";
