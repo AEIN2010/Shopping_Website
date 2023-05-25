@@ -142,4 +142,10 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(order);
         return order;
     }
+
+    @Override
+    public List<Order> findOrdersByUserId(int userId) {
+        return orderRepository.findByUserId(userId);
+
+    }
 }

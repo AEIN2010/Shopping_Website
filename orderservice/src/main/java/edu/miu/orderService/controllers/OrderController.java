@@ -29,6 +29,10 @@ public class OrderController {
     public List<Order> getOrders() {
         return orderService.getOrders();
     }
+    @GetMapping("/byid/{userId}")
+    public List<Order> getOrdersById(@PathVariable int userId){
+        return orderService.findOrdersByUserId(userId);
+    }
 
     @PostMapping("/{userId}")
     public Order createOrder(@PathVariable int userId, @RequestHeader("Authorization") String token) {
