@@ -90,7 +90,7 @@ public class ShoppingCartController {
     public String deleteCart(@PathVariable("customerId") String customerId){
        
         try{
-            deleteCart(customerId);
+            redisService.deleteCart(customerId);
             return "Cart of "+customerId+" deleted!";
         }catch (Exception e){
             return "Something Went Wrong. Maybe this customer "+customerId+" has no cart!";
