@@ -1,7 +1,6 @@
 package edu.miu.orderService.services;
 
 import edu.miu.orderService.models.Order;
-import org.aspectj.weaver.ast.Or;
 
 import java.util.List;
 
@@ -20,4 +19,6 @@ public interface OrderService {
 
     Order deleteOrder(Long OrderId);
     List<Order> findOrdersByUserId(int userId);
+
+    String clearCart(int userId);
 }
