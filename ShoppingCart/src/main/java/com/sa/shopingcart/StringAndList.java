@@ -1,3 +1,14 @@
+package com.sa.shopingcart;
+
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class StringAndList {
+
+
     public static List<ShoppingCartItem> StringToList(String input) {
         // Remove outer curly braces
         String cleanedInput = input;
@@ -41,3 +52,4 @@
 
 
 
+}
